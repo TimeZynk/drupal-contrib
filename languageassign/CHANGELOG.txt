@@ -1,0 +1,15 @@
+$Id: CHANGELOG.txt,v 1.1.2.2 2010/07/23 19:59:48 andrewschulman Exp $
+
+Language assignment 6.x-1.2, 2010-07-23
+---------------------------------------
+#861838 by Andrew Schulman: Add ability to set users' language.
+by Andrew Schulman: Add a Language column to the bulk user update form (admin/user/user).
+
+Language assignment 6.x-1.1, 2009-12-28
+---------------------------------------
+by Andrew Schulman: Change name from Language bulk assignment to Language assignment.
+#621920 by Andrew Schulman: Add action for VBO integration.
+
+Language bulk assignment 6.x-1.0, 2009-10-27
+--------------------------------------------
+Initial release of languageassign, with support for Drupal 6.x.

@@ -1,0 +1,381 @@
+<?php
+// $Id: languageassign.module,v 1.1.2.5 2010/08/04 02:54:51 andrewschulman Exp $
+
+/**
+ * @file
+ * Add "Set language" operations to:
+ * * bulk node management form at admin/content/node.
+ * * bulk user management form at admin/user/user.
+ * * node and user bulk operations-style views, when views_bulk_operations is installed.
+ */
+
+/**
+ * Implementation of hook_help().
+ */
+function languageassign_help($path, $arg) {
+  switch ($path) {
+    case 'admin/help#languageassign':
+      $output  = '<p>'. t('The Language assignment module allows you to set the language of multiple nodes or users at a time.  To use it, go to the <a href="@nodeupdate">bulk node update form</a> or <a href="@userupdate">bulk user update form</a>, open the Update options selector, and look for the "Set language" options.  (It also adds a Language column to the user table in the bulk user update form.)', array('@nodeupdate' => url('admin/content/node'), '@userupdate' => url('admin/user/user'))) .'</p>';
+      $output .= '<p>'. t('If <a href="http://drupal.org/project/views_bulk_operations">Views bulk operations</a> is installed at your site, then a "Set language" operation will also become available in your node and user bulk operation-style views.  To enable the operation, edit your view, click on the gear icon to edit the "Bulk operations" style options, check the "Set language" checkbox, and save the view.') .'</p>';
+      return $output;
+  }
+}
+
+/**
+ * Nodes
+ */
+
+/**
+ * Implementation of hook_node_operations().
+ * 
+ * Provide a 'Set language' operation for each installed language,
+ * plus 'Language neutral'.
+ */
+function languageassign_node_operations() {
+  $languages = array('' => t('Language neutral')) + locale_language_list('name');
+  $setops = array();
+  foreach ($languages as $langcode => $name) {
+    $setops['languageassign-'. $langcode] = $name;
+  }
+  $operations = array(
+    t('Set language') => array('label' => $setops),
+  );
+  return $operations;
+}
+
+/**
+ * Implementation of hook_form_node_admin_content_alter().
+ * 
+ * Add a submit callback for the 'Update options' part of the form.
+ */
+function languageassign_form_node_admin_content_alter(&$form, $form_state) {
+  $form['admin']['options']['submit']['#submit'][] = 'languageassign_form_node_admin_content_submit';
+}
+
+/**
+ * Submit callback for admin/content/node:
+ * Update the selected nodes' language.
+ */
+function languageassign_form_node_admin_content_submit($form, &$form_state) {
+  list($op, $langcode) = explode('-', $form_state['values']['operation']);
+  if ($op == 'languageassign') {
+    node_mass_update(array_filter($form_state['values']['nodes']), array('language' => $langcode));
+  }
+}
+
+/**
+ * Users
+ */
+
+/**
+ * Implementation of hook_user_operations().
+ * 
+ * Provide a 'Set language' operation for each installed language.
+ */
+function languageassign_user_operations() {
+  $setops = array();
+  foreach (locale_language_list('name') as $langcode => $name) {
+    $setops['languageassign-'. $langcode] = $name;
+  }
+  $operations = array(
+    t('Set language') => array('label' => $setops),
+  );
+  return $operations;
+}
+
+/**
+ * We want to add a Language column to the user table at admin/user/user.
+ * Unfortunately, the list of columns in that table is hard-coded in TWO 
+ * functions, user_admin_account() and theme_user_admin_account(), both in
+ * user.admin.inc.  So override and entirely replicate both of those here,
+ * with the Language column added.
+ */
+
+/**
+ * Override user_admin_account(): 
+ *   Called by the page callback for admin/user/user, to
+ *   build the user admin form.  Substitute our own page callback, that calls
+ *   our version of this function instead.
+ */
+
+/**
+ * Implementation of hook_menu_alter().
+ */
+function languageassign_menu_alter(&$items) {
+  $items['admin/user/user']['page callback'] = 'languageassign_user_admin';
+}
+
+/**
+ * Page callback for admin/user/user.
+ * 
+ * @param unknown_type $callback_arg
+ * This function is identical to user_admin() in user.admin.inc,
+ * except that it calls our custom form builder, languageassign_user_admin_account().
+ */
+function languageassign_user_admin($callback_arg = '') {
+  $op = isset($_POST['op']) ? $_POST['op'] : $callback_arg;
+
+  switch ($op) {
+    case t('Create new account'):
+    case 'create':
+      $output = drupal_get_form('user_register');
+      break;
+    default:
+      if (!empty($_POST['accounts']) && isset($_POST['operation']) && ($_POST['operation'] == 'delete')) {
+        $output = drupal_get_form('user_multiple_delete_confirm');
+      }
+      else {
+        $output = drupal_get_form('user_filter_form');
+        $output .= drupal_get_form('languageassign_user_admin_account'); // <-- N.B.
+      }
+  }
+  return $output;
+}
+
+/**
+ * Form builder; User administration page.
+ *
+ * @ingroup forms
+ * @see user_admin_account_validate()
+ * @see user_admin_account_submit()
+ * This function is identical to user_admin_account() in user.admin.inc,
+ * except that we add a (sortable) Language column to the user table.
+ */
+function languageassign_user_admin_account() {
+  $filter = user_build_filter_query();
+
+  $header = array(
+    array(),
+    array('data' => t('Username'), 'field' => 'u.name'),
+    array('data' => t('Status'), 'field' => 'u.status'),
+    t('Roles'),
+    array('data' => t('Member for'), 'field' => 'u.created', 'sort' => 'desc'),
+    array('data' => t('Last access'), 'field' => 'u.access'),
+    array('data' => t('Language'), 'field' => 'u.language'),
+    t('Operations')
+  );
+
+  if ($filter['join'] != "") {
+    $sql = 'SELECT DISTINCT u.uid, u.name, u.status, u.created, u.access, u.language FROM {users} u LEFT JOIN {users_roles} ur ON u.uid = ur.uid '. $filter['join'] .' WHERE u.uid != 0 '. $filter['where'];
+    $query_count = 'SELECT COUNT(DISTINCT u.uid) FROM {users} u LEFT JOIN {users_roles} ur ON u.uid = ur.uid '. $filter['join'] .' WHERE u.uid != 0 '. $filter['where'];
+  }
+  else {
+    $sql = 'SELECT u.uid, u.name, u.status, u.created, u.access, u.language FROM {users} u WHERE u.uid != 0 '. $filter['where'];
+    $query_count = 'SELECT COUNT(u.uid) FROM {users} u WHERE u.uid != 0 '. $filter['where'];
+  }
+
+  $sql .= tablesort_sql($header);
+
+  $result = pager_query($sql, 50, 0, $query_count, $filter['args']);
+
+  $form['options'] = array(
+    '#type' => 'fieldset',
+    '#title' => t('Update options'),
+    '#prefix' => '<div class="container-inline">',
+    '#suffix' => '</div>',
+  );
+  $options = array();
+  foreach (module_invoke_all('user_operations') as $operation => $array) {
+    $options[$operation] = $array['label'];
+  }
+  $form['options']['operation'] = array(
+    '#type' => 'select',
+    '#options' => $options,
+    '#default_value' => 'unblock',
+  );
+  $form['options']['submit'] = array(
+    '#type' => 'submit',
+    '#value' => t('Update'),
+  );
+
+  $destination = drupal_get_destination();
+
+  $status = array(t('blocked'), t('active'));
+  $roles = user_roles(TRUE);
+  $accounts = array();
+  while ($account = db_fetch_object($result)) {
+    $accounts[$account->uid] = '';
+    $form['name'][$account->uid] = array('#value' => theme('username', $account));
+    $form['status'][$account->uid] =  array('#value' => $status[$account->status]);
+    $users_roles = array();
+    $roles_result = db_query('SELECT rid FROM {users_roles} WHERE uid = %d', $account->uid);
+    while ($user_role = db_fetch_object($roles_result)) {
+      $users_roles[] = $roles[$user_role->rid];
+    }
+    asort($users_roles);
+    $form['roles'][$account->uid][0] = array('#value' => theme('item_list', $users_roles));
+    $form['member_for'][$account->uid] = array('#value' => format_interval(time() - $account->created));
+    $form['last_access'][$account->uid] =  array('#value' => $account->access ? t('@time ago', array('@time' => format_interval(time() - $account->access))) : t('never'));
+    $form['language'][$account->uid] = array('#value' => locale_language_name($account->language));
+    $form['operations'][$account->uid] = array('#value' => l(t('edit'), "user/$account->uid/edit", array('query' => $destination)));
+  }
+  $form['accounts'] = array(
+    '#type' => 'checkboxes',
+    '#options' => $accounts
+  );
+  $form['pager'] = array('#value' => theme('pager', NULL, 50, 0));
+  
+  return $form;
+}
+
+function languageassign_user_admin_account_submit($form, &$form_state) {
+  list($op, $langcode) = explode('-', $form_state['values']['operation']);
+  if ($op == 'languageassign') {
+    // Update the selected users' language.
+    foreach (array_filter($form_state['values']['accounts']) as $uid) {
+      $account = user_load(array('uid' => (int)$uid));
+      user_save($account, array('language' => $langcode));
+    }
+    drupal_set_message(sprintf(t("Language updated to %s."), locale_language_name($langcode)));
+  }
+  else { 
+    return user_admin_account_submit($form, $form_state);
+  }
+}
+
+function languageassign_user_admin_account_validate($form, &$form_state) {
+  return user_admin_account_validate($form, $form_state);
+}
+
+/**
+ * Implementation of hook_theme().
+ */
+function languageassign_theme() {
+  return array(
+    'languageassign_user_admin_account' => array( 'arguments' => array('form' => NULL) ),
+  );
+}
+
+/**
+ * Theme user administration overview.
+ *
+ * @ingroup themeable
+ * This function is identical to theme_user_admin_account() in user.module, 
+ * except that we add a Language column to the user table.
+ */
+function theme_languageassign_user_admin_account($form) {
+  // Overview table:
+  $header = array(
+    theme('table_select_header_cell'),
+    array('data' => t('Username'), 'field' => 'u.name'),
+    array('data' => t('Status'), 'field' => 'u.status'),
+    t('Roles'),
+    array('data' => t('Member for'), 'field' => 'u.created', 'sort' => 'desc'),
+    array('data' => t('Last access'), 'field' => 'u.access'),
+    array('data' => t('Language'), 'field' => 'u.language'),
+    t('Operations')
+  );
+
+  $output = drupal_render($form['options']);
+  if (isset($form['name']) && is_array($form['name'])) {
+    foreach (element_children($form['name']) as $key) {
+      $rows[] = array(
+        drupal_render($form['accounts'][$key]),
+        drupal_render($form['name'][$key]),
+        drupal_render($form['status'][$key]),
+        drupal_render($form['roles'][$key]),
+        drupal_render($form['member_for'][$key]),
+        drupal_render($form['last_access'][$key]),
+        drupal_render($form['language'][$key]),
+        drupal_render($form['operations'][$key]),
+      );
+    }
+  }
+  else {
+    $rows[] = array(array('data' => t('No users available.'), 'colspan' => '7'));
+  }
+
+  $output .= theme('table', $header, $rows);
+  if ($form['pager']['#value']) {
+    $output .= drupal_render($form['pager']);
+  }
+
+  $output .= drupal_render($form);
+
+  return $output;
+}
+
+
+/**
+ * Views Bulk Operations
+ */
+
+/**
+ * Implementation of hook_action_info().
+ * Provides integration with Views bulk operations.
+ */
+function languageassign_action_info () {
+  return array(
+    'languageassign_set_node_language_action' => array(
+      'type' => 'node',
+      'description' => t('Set language'),
+      'configurable' => TRUE,
+      'behavior' => array('changes_node_property'),
+      'hooks' => array(
+        // not really sure what should go here
+        'any' => TRUE,
+        'nodeapi' => array('presave'),
+        'comment' => array('insert', 'update'),
+      ),
+    ),
+    'languageassign_set_user_language_action' => array(
+      'type' => 'user',
+      'description' => t('Set language'),
+      'configurable' => TRUE,
+      'hooks' => array(
+        // not really sure what should go here
+        'any' => TRUE,
+      ),
+    ),
+  );
+}
+
+/**
+ * Implementation of a configurable Drupal action.
+ * Sets the language field of a node.
+ */
+function languageassign_set_node_language_action(&$node, $context) {
+  $node->language = $context['language'];
+}
+
+function languageassign_set_node_language_action_form($context) {
+  $languages = array('' => t('Language neutral')) + locale_language_list('name');
+  // Provide radio buttons for selecting among <=5 languages, otherwise a dropdown. 
+  $form['language'] = array(
+    '#type' => count($languages) <= 5 ? 'radios' : 'select',
+    '#title' => t('Set language'),
+    '#default_value' => language_default('language'),
+    '#options' => $languages,
+    '#description' => t('The language to assign to the selected node(s).'),
+  );
+  return $form;
+}
+
+function languageassign_set_node_language_action_submit($form, $form_state) {
+  return array('language' => $form_state['values']['language']);
+}
+
+/**
+ * Implementation of a configurable Drupal action.
+ * Sets the language field of a user.
+ */
+function languageassign_set_user_language_action(&$user, $context) {
+  user_save($user, array('language' => $context['language']));
+}
+
+function languageassign_set_user_language_action_form($context) {
+  $languages = locale_language_list('name');
+  // Provide radio buttons for selecting among <=5 languages, otherwise a dropdown. 
+  $form['language'] = array(
+    '#type' => count($languages) <= 5 ? 'radios' : 'select',
+    '#title' => t('Set language'),
+    '#default_value' => language_default('language'),
+    '#options' => $languages,
+    '#description' => t('The language to assign to the selected user(s).'),
+  );
+  return $form;
+}
+
+function languageassign_set_user_language_action_submit($form, $form_state) {
+  return array('language' => $form_state['values']['language']);
+}

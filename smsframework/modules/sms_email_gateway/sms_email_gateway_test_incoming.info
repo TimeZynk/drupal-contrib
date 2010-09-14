@@ -1,0 +1,13 @@
+; $Id: sms_email_gateway_test_incoming.info,v 1.1.2.1 2009/04/21 21:49:54 thehunmonkgroup Exp $
+name = "E-mail Gateway Testing"
+description = "Simple test module for incoming messages via the e-meil gateway."
+dependencies[] = sms
+dependencies[] = sms_email_gateway
+package = SMS Framework
+core = 6.x
+; Information added by drupal.org packaging script on 2010-07-11
+version = "6.x-2.x-dev"
+core = "6.x"
+project = "smsframework"
+datestamp = "1278835734"
+
