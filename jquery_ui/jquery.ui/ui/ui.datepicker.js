@@ -1,5 +1,5 @@
 /*
- * jQuery UI Datepicker 1.7.2
+ * jQuery UI Datepicker 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -13,7 +13,7 @@
 
 (function($) { // hide the namespace
 
-$.extend($.ui, { datepicker: { version: "1.7.2" } });
+$.extend($.ui, { datepicker: { version: "1.7.3" } });
 
 var PROP_NAME = 'datepicker';
 
@@ -1627,7 +1627,7 @@ $.fn.datepicker = function(options){
 $.datepicker = new Datepicker(); // singleton instance
 $.datepicker.initialized = false;
 $.datepicker.uuid = new Date().getTime();
-$.datepicker.version = "1.7.2";
+$.datepicker.version = "1.7.3";
 
 // Workaround for #4055
 // Add another global to avoid noConflict issues with inline event handlers

@@ -1,5 +1,5 @@
 /*
- * jQuery UI 1.7.2
+ * jQuery UI 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -14,7 +14,7 @@ var _remove = $.fn.remove,
 
 //Helper functions and ui object
 $.ui = {
-	version: "1.7.2",
+	version: "1.7.3",
 
 	// $.ui.plugin is deprecated.  Use the proxy pattern instead.
 	plugin: {
@@ -135,13 +135,17 @@ if (isFF2) {
 
 //jQuery plugins
 $.fn.extend({
-	remove: function() {
-		// Safari has a native remove event which actually removes DOM elements,
-		// so we have to use triggerHandler instead of trigger (#3037).
-		$("*", this).add(this).each(function() {
-			$(this).triggerHandler("remove");
+	remove: function(selector, keepData) {
+		return this.each(function() {
+			if ( !keepData ) {
+				if ( !selector || $.filter( selector, [ this ] ).length ) {
+					$( "*", this ).add( this ).each(function() {
+						$( this ).triggerHandler( "remove" );
+					});
+				}
+			}
+			return _remove.call( $(this), selector, keepData );
 		});
-		return _remove.apply(this, arguments );
 	},
 
 	enableSelection: function() {
@@ -518,7 +522,7 @@ $.ui.mouse.defaults = {
 
 })(jQuery);
 /*
- * jQuery UI Draggable 1.7.2
+ * jQuery UI Draggable 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -919,7 +923,7 @@ $.widget("ui.draggable", $.extend({}, $.ui.mouse, {
 }));
 
 $.extend($.ui.draggable, {
-	version: "1.7.2",
+	version: "1.7.3",
 	eventPrefix: "drag",
 	defaults: {
 		addClasses: true,
@@ -1284,7 +1288,7 @@ $.ui.plugin.add("draggable", "zIndex", {
 
 })(jQuery);
 /*
- * jQuery UI Droppable 1.7.2
+ * jQuery UI Droppable 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -1418,7 +1422,7 @@ $.widget("ui.droppable", {
 });
 
 $.extend($.ui.droppable, {
-	version: "1.7.2",
+	version: "1.7.3",
 	eventPrefix: 'drop',
 	defaults: {
 		accept: '*',
@@ -1566,7 +1570,7 @@ $.ui.ddmanager = {
 
 })(jQuery);
 /*
- * jQuery UI Resizable 1.7.2
+ * jQuery UI Resizable 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -2065,7 +2069,7 @@ $.widget("ui.resizable", $.extend({}, $.ui.mouse, {
 }));
 
 $.extend($.ui.resizable, {
-	version: "1.7.2",
+	version: "1.7.3",
 	eventPrefix: "resize",
 	defaults: {
 		alsoResize: false,
@@ -2366,7 +2370,7 @@ var isNumber = function(value) {
 
 })(jQuery);
 /*
- * jQuery UI Selectable 1.7.2
+ * jQuery UI Selectable 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -2609,7 +2613,7 @@ $.widget("ui.selectable", $.extend({}, $.ui.mouse, {
 }));
 
 $.extend($.ui.selectable, {
-	version: "1.7.2",
+	version: "1.7.3",
 	defaults: {
 		appendTo: 'body',
 		autoRefresh: true,
@@ -2623,7 +2627,7 @@ $.extend($.ui.selectable, {
 
 })(jQuery);
 /*
- * jQuery UI Sortable 1.7.2
+ * jQuery UI Sortable 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -3609,7 +3613,7 @@ $.widget("ui.sortable", $.extend({}, $.ui.mouse, {
 
 $.extend($.ui.sortable, {
 	getter: "serialize toArray",
-	version: "1.7.2",
+	version: "1.7.3",
 	eventPrefix: "sort",
 	defaults: {
 		appendTo: "parent",
@@ -3642,7 +3646,7 @@ $.extend($.ui.sortable, {
 
 })(jQuery);
 /*
- * jQuery UI Effects 1.7.2
+ * jQuery UI Effects 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -3653,7 +3657,7 @@ $.extend($.ui.sortable, {
 ;jQuery.effects || (function($) {
 
 $.effects = {
-	version: "1.7.2",
+	version: "1.7.3",
 
 	// Saves a set of properties in a data storage
 	save: function(element, set) {
@@ -4187,7 +4191,7 @@ $.extend($.easing,
 
 })(jQuery);
 /*
- * jQuery UI Effects Blind 1.7.2
+ * jQuery UI Effects Blind 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4236,7 +4240,7 @@ $.effects.blind = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Effects Bounce 1.7.2
+ * jQuery UI Effects Bounce 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4314,7 +4318,7 @@ $.effects.bounce = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Effects Clip 1.7.2
+ * jQuery UI Effects Clip 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4368,7 +4372,7 @@ $.effects.clip = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Effects Drop 1.7.2
+ * jQuery UI Effects Drop 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4418,7 +4422,7 @@ $.effects.drop = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Effects Explode 1.7.2
+ * jQuery UI Effects Explode 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4497,7 +4501,7 @@ $.effects.explode = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Effects Fold 1.7.2
+ * jQuery UI Effects Fold 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4553,7 +4557,7 @@ $.effects.fold = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Effects Highlight 1.7.2
+ * jQuery UI Effects Highlight 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4601,7 +4605,7 @@ $.effects.highlight = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Effects Pulsate 1.7.2
+ * jQuery UI Effects Pulsate 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4657,7 +4661,7 @@ $.effects.pulsate = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Effects Scale 1.7.2
+ * jQuery UI Effects Scale 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4837,7 +4841,7 @@ $.effects.size = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Effects Shake 1.7.2
+ * jQuery UI Effects Shake 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4894,7 +4898,7 @@ $.effects.shake = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Effects Slide 1.7.2
+ * jQuery UI Effects Slide 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4944,7 +4948,7 @@ $.effects.slide = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Effects Transfer 1.7.2
+ * jQuery UI Effects Transfer 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -4989,7 +4993,7 @@ $.effects.transfer = function(o) {
 
 })(jQuery);
 /*
- * jQuery UI Accordion 1.7.2
+ * jQuery UI Accordion 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -5370,7 +5374,7 @@ $.widget("ui.accordion", {
 
 
 $.extend($.ui.accordion, {
-	version: "1.7.2",
+	version: "1.7.3",
 	defaults: {
 		active: null,
 		alwaysOpen: true, //deprecated, use collapsible
@@ -5466,7 +5470,7 @@ $.extend($.ui.accordion, {
 
 })(jQuery);
 /*
- * jQuery UI Datepicker 1.7.2
+ * jQuery UI Datepicker 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -5480,7 +5484,7 @@ $.extend($.ui.accordion, {
 
 (function($) { // hide the namespace
 
-$.extend($.ui, { datepicker: { version: "1.7.2" } });
+$.extend($.ui, { datepicker: { version: "1.7.3" } });
 
 var PROP_NAME = 'datepicker';
 
@@ -7094,7 +7098,7 @@ $.fn.datepicker = function(options){
 $.datepicker = new Datepicker(); // singleton instance
 $.datepicker.initialized = false;
 $.datepicker.uuid = new Date().getTime();
-$.datepicker.version = "1.7.2";
+$.datepicker.version = "1.7.3";
 
 // Workaround for #4055
 // Add another global to avoid noConflict issues with inline event handlers
@@ -7102,7 +7106,7 @@ window.DP_jQuery = $;
 
 })(jQuery);
 /*
- * jQuery UI Dialog 1.7.2
+ * jQuery UI Dialog 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -7597,7 +7601,7 @@ $.widget("ui.dialog", {
 });
 
 $.extend($.ui.dialog, {
-	version: "1.7.2",
+	version: "1.7.3",
 	defaults: {
 		autoOpen: true,
 		bgiframe: false,
@@ -7773,7 +7777,7 @@ $.extend($.ui.dialog.overlay.prototype, {
 
 })(jQuery);
 /*
- * jQuery UI Progressbar 1.7.2
+ * jQuery UI Progressbar 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -7881,7 +7885,7 @@ $.widget("ui.progressbar", {
 });
 
 $.extend($.ui.progressbar, {
-	version: "1.7.2",
+	version: "1.7.3",
 	defaults: {
 		value: 0
 	}
@@ -7889,7 +7893,7 @@ $.extend($.ui.progressbar, {
 
 })(jQuery);
 /*
- * jQuery UI Slider 1.7.2
+ * jQuery UI Slider 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -8429,7 +8433,7 @@ $.widget("ui.slider", $.extend({}, $.ui.mouse, {
 
 $.extend($.ui.slider, {
 	getter: "value values",
-	version: "1.7.2",
+	version: "1.7.3",
 	eventPrefix: "slide",
 	defaults: {
 		animate: false,
@@ -8447,7 +8451,7 @@ $.extend($.ui.slider, {
 
 })(jQuery);
 /*
- * jQuery UI Tabs 1.7.2
+ * jQuery UI Tabs 1.7.3
  *
  * Copyright (c) 2009 AUTHORS.txt (http://jqueryui.com/about)
  * Dual licensed under the MIT (MIT-LICENSE.txt)
@@ -8459,6 +8463,9 @@ $.extend($.ui.slider, {
  *	ui.core.js
  */
 (function($) {
+
+var tabId = 0,
+	listId = 0;
 
 $.widget("ui.tabs", {
 
@@ -8487,7 +8494,7 @@ $.widget("ui.tabs", {
 
 	_tabId: function(a) {
 		return a.title && a.title.replace(/\s/g, '_').replace(/[^A-Za-z0-9\-_:\.]/g, '') ||
-			this.options.idPrefix + $.data(a);
+			this.options.idPrefix + (++tabId);
 	},
 
 	_sanitizeSelector: function(hash) {
@@ -8495,7 +8502,7 @@ $.widget("ui.tabs", {
 	},
 
 	_cookie: function() {
-		var cookie = this.cookie || (this.cookie = this.options.cookie.name || 'ui-tabs-' + $.data(this.list[0]));
+		var cookie = this.cookie || (this.cookie = this.options.cookie.name || 'ui-tabs-' + (++listId));
 		return $.cookie.apply(null, [cookie].concat($.makeArray(arguments)));
 	},
 
@@ -9060,7 +9067,7 @@ $.widget("ui.tabs", {
 });
 
 $.extend($.ui.tabs, {
-	version: '1.7.2',
+	version: '1.7.3',
 	getter: 'length',
 	defaults: {
 		ajaxOptions: null,
