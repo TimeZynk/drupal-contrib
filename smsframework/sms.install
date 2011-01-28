@@ -1,15 +1,20 @@
 <?php
-// $Id: sms.install,v 1.8.4.2 2009/06/01 21:52:11 diggersf Exp $
+// $Id: sms.install,v 1.8.4.6 2011/01/02 05:57:19 univate Exp $
 
 /**
- * Implementation of hook_install().
+ * @file
+ * Install, update and uninstall functions for the smsframework module.
+ */
+
+/**
+ * Implements hook_install().
  */
 function sms_install() {
   drupal_install_schema('sms');
 }
 
 /**
- * Implementation of hook_schema().
+ * Implements hook_schema().
  */
 function sms_schema() {
   $schema['sms_carriers'] = array(
@@ -24,7 +29,7 @@ function sms_schema() {
 }
 
 /**
- * Implementation of hook_update().
+ * Implements hook_update().
  *
  * Drop the now dead delta field, and change primary key to number.
  */
@@ -38,7 +43,7 @@ function sms_update_1() {
 }
 
 /**
- * Implementation of hook_uninstall().
+ * Implements hook_uninstall().
  */
 function sms_uninstall() {
   drupal_uninstall_schema('sms');

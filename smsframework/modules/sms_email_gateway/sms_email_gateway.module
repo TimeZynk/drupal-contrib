@@ -1,6 +1,14 @@
 <?php
-// $Id: sms_email_gateway.module,v 1.4.2.2.2.8 2009/06/01 21:47:20 diggersf Exp $
+// $Id: sms_email_gateway.module,v 1.4.2.2.2.10 2011/01/02 08:46:58 univate Exp $
 
+/**
+ * @file
+ * 
+ */
+
+/**
+ * Implements hook_gateway_info().
+ */
 function sms_email_gateway_gateway_info() {
   return array(
     'email' => array(

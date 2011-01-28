@@ -1,0 +1,14 @@
+; $Id: sms_track.info,v 1.1.4.2 2010/11/18 11:05:46 univate Exp $
+name = Tracking
+description = Message archiving and delivery tracking for the SMS Framework.
+core = 6.x
+package = SMS Framework
+dependencies[] = sms
+dependencies[] = views
+
+; Information added by drupal.org packaging script on 2011-01-10
+version = "6.x-2.x-dev"
+core = "6.x"
+project = "smsframework"
+datestamp = "1294662500"
+
